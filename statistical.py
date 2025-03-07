@@ -29,17 +29,14 @@ def RSI(prices: np.ndarray, period: int = 14) -> float:
 
 
 def Sharpe_Ratio(prices: np.ndarray, period: int = 90, risk_free_rate: float = 0.03) -> float:
-    if len(prices) < period:
-        raise ValueError(f"Not enough data! Need at least {period} days.")
-
  
     returns = np.diff(prices[-(period + 1):]) / prices[-(period + 1):-1]
-
 
     excess_return = np.mean(returns) - (risk_free_rate / 252) 
     volatility = np.std(returns)
 
     return excess_return / volatility if volatility != 0 else np.nan
+
 
 def find_average( json_obj : dict , name : str ) -> int: 
     quant = [] 
