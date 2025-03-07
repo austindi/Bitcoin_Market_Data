@@ -1,0 +1,47 @@
+-Sharpe Ratio
+	-The Sharpe Ratio measures risk-adjusted returns by comparing an asset’s excess return (above the risk-free rate) to its volatility.
+	-A higher Sharpe Ratio indicates better risk-adjusted performance.
+	-Formula:
+        S = (R_p - R_f)/sigma_p
+
+    where:
+	    -R_p  = Expected portfolio return
+	    -R_f  = Risk-free rate
+	    -sigma_p  = Standard deviation of returns
+
+-Relative Strength Index (RSI)
+	-The RSI is a momentum indicator that measures the speed and change of price movements over 14 days.
+	-RSI values range from 0 to 100:
+	-Above 70 → Overbought (possible price correction)
+	-Below 30 → Oversold (potential buying opportunity)
+	-Formula:
+        -RSI = 100 - ( 100/(1 + RS)
+    where:
+	    -RS = Average Gain over 14 days/Average Loss over 14 days
+
+-50-Day Moving Average (MA-50) & 200-Day Moving Average (MA-200)
+	-Moving Averages (MA) smooth out price fluctuations to identify trends.
+	-MA-50 → Short-term trend indicator (bullish if above MA-200).
+	-MA-200 → Long-term trend indicator (signals overall market direction).
+	-Formula:
+        MA_n = (P_1 + P_2 + ... + P_n)/ n
+    where:
+        -MA_n  = Moving average over  n  days
+	    -P_i  = Price on day  i 
+
+-24-Hour Trading Volume
+	-The 24-hour trading volume represents the total value of an asset traded in a day.
+	-Higher volume indicates strong liquidity and market interest.
+	-Formula:
+        V = \sum_{i=1}^{N} P_i * Q_i
+    where:
+	    -P_i  = Price of the trade
+	    -Q_i  = Quantity traded
+	    -N  = Total number of trades in 24 hours
+
+Why These Metrics Matter?
+	-Sharpe Ratio → Helps investors assess risk vs. return.
+	-RSI → Identifies overbought/oversold conditions for trade signals.
+	-MA-50 & MA-200 → Confirm trend direction and potential reversals.
+	-24H Volume → Reflects market liquidity & investor interest.
+
