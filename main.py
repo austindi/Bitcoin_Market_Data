@@ -1,4 +1,3 @@
-import pendulum
 import os 
 from prefect import task, flow, get_run_logger 
 import duckdb 
@@ -8,7 +7,6 @@ from statistical import *
 import json
 from datetime import datetime, UTC
 
-nyc_time = pendulum.timezone("America/New_York")
 
 @task( name = "Data transformation" )  
 def transform_data( json_obj : dict, derivates_dict : dict ) -> dict: 
@@ -90,23 +88,32 @@ def add_data_to_DB(data_base: str, crypto_dict: dict) -> None:
         logger.info('Crypto data added to database.' ) 
 
 @flow
-def collect_market_data( )-> None:  
+def collect_market_data( )-> None:    
+    fromaddr = 'austindi1133@gmail.com' 
+    toaddrs = 'austindi1133@gmail.com' 
+    subject = 'Bitcoin flow Status' 
+    try:
+        load_dotenv()
+        API_KEY = os.getenv("MY_API_KEY")
+        URL =  "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart"
 
-    load_dotenv()
-    API_KEY = os.getenv("MY_API_KEY")
-    URL =  "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart"
+        params = { "vs_currency": "usd","days": 200 }
+        coin_data = collect_info( API_KEY, URL = URL, params = params ) 
 
-    params = { "vs_currency": "usd","days": 200 }
-    coin_data = collect_info( API_KEY, URL = URL, params = params ) 
+        URL = "https://api.coingecko.com/api/v3/derivatives/exchanges"
+        params = {} 
+        derivates_data = collect_info( API_KEY =API_KEY ,  URL = URL )
 
-    URL = "https://api.coingecko.com/api/v3/derivatives/exchanges"
-    params = {} 
-    derivates_data = collect_info( API_KEY =API_KEY ,  URL = URL )
+        crypto_object = transform_data( coin_data , derivates_data )  
+         
+        add_data_to_DB('bitcoin.db', crypto_object)
 
-    crypto_object = transform_data( coin_data , derivates_data )  
-     
-    add_data_to_DB('bitcoin.db', crypto_object)
+        message = "Flow run was successful!"
+        send_email( fromaddr, toaddrs, subject , message )
 
+    except Exception as e:
+        message = f"Flow run failed with error: {e}"
+        send_email( fromaddr, toaddrs, subject, message ) 
 
 if __name__ == '__main__':
     #Runs at 9:30 EST/14:30 UTC  

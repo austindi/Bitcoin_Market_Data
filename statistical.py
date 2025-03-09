@@ -1,5 +1,28 @@
 from numpy.typing import NDArray
+from dotenv import load_dotenv
+import os 
+import smtplib
 import numpy as np 
+
+
+def get_SMTP( ):
+     SMTP = { }
+     load_dotenv()
+     SMTP[ 'server' ]   = os.getenv( "mail_server" ) 
+     SMTP[ 'port' ]     = int( os.getenv( "mail_port" ) )
+     SMTP[ 'username' ] = os.getenv( "mail_login" )  
+     SMTP[ 'password' ] = os.getenv( "mail_password" ) 
+     return SMTP
+
+def send_email ( fromaddr, toaddrs, subject,  message, SMTP = get_SMTP( )):
+    server = smtplib.SMTP( SMTP[ 'server' ], SMTP[ 'port' ] )
+    server.ehlo()
+    server.starttls()
+    server.ehlo()
+    server.login( SMTP[ 'username' ], SMTP[ 'password' ] )
+    email_body = f"Subject: {subject}\nFrom: {fromaddr}\nTo: {toaddrs}\n\n{message}"
+    server.sendmail(fromaddr, toaddrs,  email_body)
+    server.quit()
 
 
 def moving_average(prices: np.ndarray ) -> float:
