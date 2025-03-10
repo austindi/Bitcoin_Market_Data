@@ -1,12 +1,12 @@
 import os 
-from prefect import task, flow, get_run_logger 
+from prefect import task, flow, get_run_logger
 import duckdb 
 import requests 
 from dotenv import load_dotenv
 from statistical import * 
 import json
 from datetime import datetime, UTC
-
+from secure_database import verify_user
 
 @task( name = "Data transformation" )  
 def transform_data( json_obj : dict, derivates_dict : dict ) -> dict: 
@@ -88,32 +88,45 @@ def add_data_to_DB(data_base: str, crypto_dict: dict) -> None:
         logger.info('Crypto data added to database.' ) 
 
 @flow
-def collect_market_data( )-> None:    
-    fromaddr = 'austindi1133@gmail.com' 
-    toaddrs = 'austindi1133@gmail.com' 
-    subject = 'Bitcoin flow Status' 
-    try:
-        load_dotenv()
-        API_KEY = os.getenv("MY_API_KEY")
-        URL =  "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart"
+def collect_market_data( fromaddr : str = 'austindi1133@gmail.com',
+                        toaddrs : str ='austindi1133@gmail.com',
+                        subject : str = 'Bitcoin flow Status' )-> None:    
 
-        params = { "vs_currency": "usd","days": 200 }
-        coin_data = collect_info( API_KEY, URL = URL, params = params ) 
 
-        URL = "https://api.coingecko.com/api/v3/derivatives/exchanges"
-        params = {} 
-        derivates_data = collect_info( API_KEY =API_KEY ,  URL = URL )
+    logger = get_run_logger()
+    load_dotenv() 
 
-        crypto_object = transform_data( coin_data , derivates_data )  
-         
-        add_data_to_DB('bitcoin.db', crypto_object)
+    username = os.getenv( 'username' ) 
+    password = os.getenv( 'password' ) 
 
-        message = "Flow run was successful!"
-        send_email( fromaddr, toaddrs, subject , message )
+    print( username ) 
+    result = verify_user( username, password )
 
-    except Exception as e:
-        message = f"Flow run failed with error: {e}"
-        send_email( fromaddr, toaddrs, subject, message ) 
+    if result: 
+       logger.info( f'User:{username} has been verified' ) 
+       try:
+           API_KEY = os.getenv("MY_API_KEY")
+           URL =  "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart"
+
+           params = { "vs_currency": "usd","days": 200 }
+           coin_data = collect_info( API_KEY, URL = URL, params = params ) 
+
+           URL = "https://api.coingecko.com/api/v3/derivatives/exchanges"
+           params = {} 
+           derivates_data = collect_info( API_KEY =API_KEY ,  URL = URL )
+
+           crypto_object = transform_data( coin_data , derivates_data )  
+            
+           add_data_to_DB('bitcoin.db', crypto_object)
+
+           message = "Flow run was successful!"
+           send_email( fromaddr, toaddrs, subject , message )
+
+       except Exception as e:
+           message = f"Flow run failed with error: {e}"
+           send_email( fromaddr, toaddrs, subject, message ) 
+    else: 
+        logger.error( f'User:{username} has not been verified. A new user needs to be created.' ) 
 
 if __name__ == '__main__':
     #Runs at 9:30 EST/14:30 UTC  
